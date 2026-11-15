@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fff4dc">
+<title>Suspeito · Cartela de Detetive</title>
+<style>
+  :root{
+    --bg:#fff4dc; --paper:#fffdf6; --line:#ecdcb8; --ink:#3b2f2f; --muted:#9a8870;
+    --ok:#2f9e5b; --no:#e0524a; --maybe:#e8a317;
+    --c-sus:#8e5bd6; --c-arm:#f08a24; --c-com:#1fa6a0;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",system-ui,-apple-system,sans-serif}
+  body{padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    background-image:radial-gradient(#f4e2b4 1.5px, transparent 1.5px);background-size:22px 22px}
+  header{padding:16px 14px 4px;text-align:center}
+  h1{margin:0;font-size:1.9rem;letter-spacing:.08em;text-transform:uppercase;color:#c0392b;
+    text-shadow:2px 2px 0 #ffd98a}
+  h1 span{display:inline-block;animation:wob 3s ease-in-out infinite}
+  @keyframes wob{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+  header p{margin:2px 0 0;color:var(--muted);font-size:.85rem}
+  .bar{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:10px 12px 4px}
+  button{font:inherit;font-size:.85rem;font-weight:bold;background:var(--paper);color:var(--ink);
+    border:2px solid var(--line);border-bottom-width:4px;border-radius:12px;padding:7px 12px;cursor:pointer}
+  button:active{transform:translateY(2px);border-bottom-width:2px}
+  button.on{background:#ffd98a;border-color:#e8a317}
+  main{max-width:780px;margin:0 auto;padding:0 10px 40px}
+  section{background:var(--paper);border:2px solid var(--line);border-radius:18px;margin:14px 0;overflow:hidden;
+    box-shadow:0 4px 0 var(--line)}
+  .scroll{overflow-x:auto}
+  table{border-collapse:collapse;width:100%}
+  th,td{border-bottom:1px solid var(--line);text-align:center;padding:0}
+  tbody tr:last-child td{border-bottom:0}
+
+  /* cabeçalho: título + jogadores na mesma linha */
+  thead th{background:var(--sec);color:#fff;border-bottom:0}
+  th.name{text-align:left;padding:8px 6px 8px 10px;position:sticky;left:0;z-index:2;background:var(--sec);min-width:150px;
+    font-size:.92rem;line-height:1.15;white-space:nowrap}
+  th.name small{font-size:.72rem;font-weight:normal;opacity:.95;margin-left:2px}
+  th.p{min-width:46px;padding:6px 1px}
+  th.p input{width:44px;text-align:center;font:inherit;font-size:.68rem;font-weight:bold;color:#fff;
+    background:transparent;border:0;border-radius:0;padding:5px 0}
+  th.p input::placeholder{color:rgba(255,255,255,.7)}
+  th.p input:focus{outline:0;border-bottom:2px solid #fff;padding-bottom:3px}
+
+  td.name{text-align:left;padding:0 4px 0 8px;position:sticky;left:0;z-index:1;background:var(--paper);height:48px;font-size:.95rem;white-space:nowrap}
+  td.name .ic{display:inline-block;width:1.5em;font-size:1.2rem;text-align:center;margin-right:3px;vertical-align:middle}
+  tr.out td.name{background:#faf3e3}
+  tr.out td.name .t{text-decoration:line-through;color:var(--muted)}
+  tr.out td.name .ic{filter:grayscale(1);opacity:.45}
+  tr.sol td{background:#fff0b8}
+  tr.sol td.name{background:#fff0b8}
+  tr.sol td.name .t{font-weight:bold}
+  tr.sol td.name .t::after{content:" ⭐"}
+  tr.sol td.name .ic{animation:jump .8s ease-in-out infinite}
+  @keyframes jump{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px) scale(1.15)}}
+
+  td.c{width:46px;min-width:46px;height:48px;cursor:pointer;user-select:none}
+  td.c span{display:inline-flex;width:32px;height:32px;align-items:center;justify-content:center;
+    border:2px solid var(--line);border-radius:12px;font-size:1.2rem;font-weight:bold;background:#fff}
+  td.c[data-v="x"] span{color:var(--no);border-color:var(--no);background:#fff0ee}
+  td.c[data-v="o"] span{color:var(--ok);border-color:var(--ok);background:#e9f8ee}
+  td.c[data-v="q"] span{color:var(--maybe);border-color:var(--maybe);background:#fff6df}
+  td.c.pop span{animation:pop .25s ease-out}
+  @keyframes pop{0%{transform:scale(.6)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+  tr.out td.c span{opacity:.55}
+
+  .notes h2{margin:0;padding:10px 14px;font-size:1rem;background:#c0392b;color:#fff}
+  .pad{padding:12px}
+  textarea{width:100%;min-height:140px;font:inherit;color:var(--ink);background:#fffbea;
+    border:2px dashed var(--line);border-radius:12px;padding:10px;resize:vertical}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;color:var(--muted);font-size:.8rem;padding:2px 12px}
+  footer{text-align:center;color:var(--muted);font-size:.75rem;padding:6px 12px 24px}
+</style>
+</head>
+<body>
+<header>
+  <h1><span>🔍</span> Suspeito <span>🕵️</span></h1>
+  <p>Cartela de detetive</p>
+</header>
+
+<div class="bar">
+  <button id="btnAddP">➕ Jogador</button>
+  <button id="btnRemP">➖ Jogador</button>
+  <button id="btnReset">🧹 Nova partida</button>
+</div>
+
+<div class="legend">
+  <span><b style="color:var(--ok)">✓</b> tem a carta</span>
+  <span><b style="color:var(--no)">✗</b> não tem</span>
+  <span><b style="color:var(--maybe)">?</b> talvez</span>
+  <span>⭐ provável no envelope</span>
+</div>
+
+<main id="app"></main>
+
+<footer>Toque numa casinha: vazio → ✓ → ✗ → ? → vazio. Toque no nome do jogador para renomear. Tudo fica salvo neste aparelho.<br><b>Marcelo &amp; Claude</b> 🕵️</footer>
+
+<script>
+(function(){
+  var KEY = "suspeito-cartela-v3";
+  var SECTIONS = [
+    { id:"sus", title:"🕵️ Suspeitos", color:"var(--c-sus)", cards:[
+      ["🚗","Motorista"],["🧹","Empregada"],["🎩","Mordomo"],["👨‍🍳","Cozinheiro"],
+      ["💍","Esposa"],["🌱","Jardineiro"],["🏠","Vizinho"] ]},
+    { id:"arm", title:"🔪 Armas", color:"var(--c-arm)", cards:[
+      ["☠️","Veneno"],["💡","Abajur"],["🔫","Revólver"],["🔪","Faca"],
+      ["✂️","Tesoura de poda"],["🔧","Chave de boca"],["🔨","Martelo"] ]},
+    { id:"com", title:"🏚️ Cômodos", color:"var(--c-com)", cards:[
+      ["🪴","Varanda"],["💼","Escritório"],["🚪","Hall Central"],["📚","Biblioteca"],
+      ["🍽️","Sala de Jantar"],["🍳","Cozinha"],["🚿","Banheiro"],["🛏️","Suíte"],
+      ["🛌","Quarto"],["🪜","Escadaria"] ]}
+  ];
+  var CYCLE = ["", "o", "x", "q"];
+  var SYMBOL = {"":"", o:"✓", x:"✗", q:"?"};
+
+  function fresh(){
+    return { players:["Eu","Jog. 2","Jog. 3","Jog. 4"], marks:{}, notes:"" };
+  }
+  var S;
+  try { S = JSON.parse(localStorage.getItem(KEY)) || fresh(); } catch(e){ S = fresh(); }
+  if(!S.players) S = fresh();
+
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+  function mk(sec,i,p){ return sec+"|"+i+"|"+p; }
+
+  // Eliminada: alguém tem (✓) ou todos os jogadores marcaram ✗.
+  function eliminated(sec,i){
+    var allX = S.players.length > 0, any = false;
+    for(var p=0;p<S.players.length;p++){
+      var v = S.marks[mk(sec,i,p)] || "";
+      if(v==="o") any = true;
+      if(v!=="x") allX = false;
+    }
+    return any || allX;
+  }
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+
+  function render(focusKey){
+    var h = "";
+    SECTIONS.forEach(function(sec){
+      var left = [];
+      sec.cards.forEach(function(_,i){ if(!eliminated(sec.id,i)) left.push(i); });
+      var sol = left.length===1 ? left[0] : -1;
+      var sub = sol>=0 ? "restou 1 🎉" : "restam "+left.length;
+      h += '<section style="--sec:'+sec.color+'"><div class="scroll"><table><thead><tr>'+
+           '<th class="name">'+esc(sec.title)+' <small>('+sub+')</small></th>';
+      S.players.forEach(function(n,p){
+        h += '<th class="p"><input type="text" maxlength="8" data-player="'+p+'" value="'+esc(n)+'" aria-label="Nome do jogador '+(p+1)+'"></th>';
+      });
+      h += '</tr></thead><tbody>';
+      sec.cards.forEach(function(c,i){
+        var cls = eliminated(sec.id,i) ? "out" : (i===sol ? "sol" : "");
+        h += '<tr class="'+cls+'"><td class="name"><span class="ic">'+c[0]+'</span><span class="t">'+esc(c[1])+'</span></td>';
+        S.players.forEach(function(_,p){
+          var k = mk(sec.id,i,p), v = S.marks[k] || "";
+          h += '<td class="c'+(k===focusKey?' pop':'')+'" data-v="'+v+'" data-k="'+k+'"><span>'+SYMBOL[v]+'</span></td>';
+        });
+        h += '</tr>';
+      });
+      h += '</tbody></table></div></section>';
+    });
+    h += '<section class="notes"><h2>📝 Pistas e anotações</h2><div class="pad"><textarea id="notes" placeholder="Ex.: Jog. 3 mostrou uma carta para Mordomo + Faca + Biblioteca...">'+esc(S.notes)+'</textarea></div></section>';
+    document.getElementById("app").innerHTML = h;
+  }
+
+  var app = document.getElementById("app");
+  app.addEventListener("click", function(e){
+    var td = e.target.closest("td.c");
+    if(!td) return;
+    var k = td.getAttribute("data-k");
+    var cur = S.marks[k] || "";
+    var next = CYCLE[(CYCLE.indexOf(cur)+1) % CYCLE.length];
+    if(next) S.marks[k] = next; else delete S.marks[k];
+    save(); render(k);
+  });
+  app.addEventListener("input", function(e){
+    var t = e.target;
+    if(t.id==="notes"){ S.notes = t.value; save(); return; }
+    if(t.hasAttribute("data-player")){
+      var idx = +t.getAttribute("data-player");
+      S.players[idx] = t.value; save();
+      // mantém as outras tabelas sincronizadas sem recriar o campo em edição
+      var all = app.querySelectorAll('input[data-player="'+idx+'"]');
+      for(var j=0;j<all.length;j++){ if(all[j]!==t) all[j].value = t.value; }
+    }
+  });
+
+  document.getElementById("btnAddP").onclick = function(){
+    if(S.players.length>=8) return;
+    S.players.push("Jog. "+(S.players.length+1)); save(); render();
+  };
+  document.getElementById("btnRemP").onclick = function(){
+    if(S.players.length<=2) return;
+    var last = S.players.length-1;
+    Object.keys(S.marks).forEach(function(k){ if(+k.split("|")[2]===last) delete S.marks[k]; });
+    S.players.pop(); save(); render();
+  };
+
+  var resetTimer = null, btnReset = document.getElementById("btnReset");
+  function resetLabel(){ btnReset.textContent = "🧹 Nova partida"; btnReset.classList.remove("on"); resetTimer = null; }
+  btnReset.onclick = function(){
+    if(!resetTimer){
+      btnReset.textContent = "Toque de novo para limpar tudo";
+      btnReset.classList.add("on");
+      resetTimer = setTimeout(resetLabel, 4000);
+      return;
+    }
+    clearTimeout(resetTimer); resetLabel();
+    S.marks = {}; S.notes = ""; save(); render();
+  };
+
+  render();
+})();
+</script>
+</body>
+</html>
